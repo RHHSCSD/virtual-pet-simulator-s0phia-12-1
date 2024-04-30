@@ -66,6 +66,24 @@ public class VirtualPet {
         return petName;
     }
 
+    //method to play with pet
+    public static void playWithPet(int currentEnergy, int maxEnergy) {
+        System.out.print("Playing with pet...");
+        if (currentEnergy < maxEnergy)
+            currentEnergy += 2;
+    }
+    //method to feed pet
+    public static void feedPet(int currentFood, int maxFood) {
+        System.out.print("Feeding pet...");
+        if (currentFood < maxFood)
+            currentFood += 2;
+    }
+    //method to groom pet
+    public static void groomPet(int currentHealth, int maxHealth) {
+        System.out.print("Grooming pet...");
+        if (currentHealth < maxHealth)
+            currentHealth += 2;
+    }
     //method for number guessing game
     public static int numberGuessingGame() {
         Random rd = new Random();
