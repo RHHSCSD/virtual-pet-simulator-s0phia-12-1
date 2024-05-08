@@ -4,6 +4,7 @@
  */
 package virtualpet;
 import java.util.*;
+import java.io.*;
 /*
  * @author Sophia Guo
  */
@@ -116,7 +117,7 @@ public class VirtualPet {
             }
             return moonstones;
     }
-    
+
     //method to generate a random letter set
     public static String generateLetterSet() {
         Random rd = new Random();
@@ -195,43 +196,32 @@ public class VirtualPet {
         System.out.println("    c(\")_(\")");
         System.out.println("Welcome to Critterland!");
         
-        //login 
-        final String username = "snoopy";
-        final String password = "toto";
-        
         //login system
         boolean passedLogin = false;
         int count = 0;
         
-        while ((passedLogin == false) && (count < 3)) {
-            System.out.print("Enter username: ");
-            String enteredUser = scan.nextLine();
+        //money
+        int moonstones = 0;
         
+        System.out.print("Enter username: ");
+        String enteredUser = scan.nextLine();
+        String enteredPass = ""; 
+        
+        String chosenPet = "";
+        //pet stats
+        int [] maxStats = new int[3];
+        int [] currentStats = new int[3];
+            
+        File user = new File(enteredUser + ".txt");
+        
+        if (!user.exists()) {
+            System.out.print("You're a new user!");
             System.out.print("Enter password: ");
-            String enteredPass = scan.nextLine();
+            enteredPass = scan.nextLine();
             
-            if ((enteredUser.equals(username)) && (enteredPass.equals(password)))
-                passedLogin = true;
-            count ++;
-        }
-        
-        //login system
-        while (passedLogin == true) {
-            //menu
-            System.out.println("\n1.Play/Interact \n2.Instructions \n3.Exit");
-            String menuChoice = scan.nextLine();
-            
-            if ((menuChoice.equals ("1")) || ((menuChoice.equalsIgnoreCase("play")) || (menuChoice.equalsIgnoreCase("interact")))) {
-                System.out.println("Starting...");
-            }
-            else if ((menuChoice.equals ("2")) || (menuChoice.equalsIgnoreCase("instructions"))) {
-                System.out.println("Instructions: ");
-            }
-            else {
-                System.exit(0);
-            }
             //select pet
-            System.out.println("You chose the " + choosePet());
+            chosenPet = choosePet();
+            System.out.println("You chose the " + chosenPet);
             
             //name generator
             System.out.println("Choose a pet name");
@@ -251,10 +241,6 @@ public class VirtualPet {
             }
             System.out.println("Your pet, named " + petName + ", has been born!");
             
-            //pet stats
-            int [] maxStats = new int[3];
-            int [] currentStats = new int[3];
-            
             //health
             maxStats[0] = rd.nextInt((17)+1);
             currentStats[0] = maxStats[0];
@@ -266,12 +252,62 @@ public class VirtualPet {
             currentStats[2] = maxStats[2];
             
             System.out.println("\nMAXHEALTH: " + maxStats[0] + " MAXFOOD: " + maxStats[1] + " MAX_ENERGY: " + maxStats[2]);
+            passedLogin = true;  
             
+            scan.nextLine();
+        } else {
+            try {
+                Scanner input = new Scanner(user);
+                while ((passedLogin == false) && (count < 3)) {
+                    System.out.print("Enter password: ");
+                    enteredPass = scan.nextLine();
+                    if (enteredPass == input.nextLine()) 
+                        passedLogin = true;
+                    count++;
+                }
+                input.close();
+            }
+            catch (IOException e) {
+                System.out.println("Login failed.");
+                System.exit(0);         
+            }
+          }
+            
+        //login system
+        while (passedLogin == true) {
+            //menu
+            System.out.println("\n1.Play/Interact \n2.Instructions \n3.Exit");
+            String menuChoice = scan.nextLine();
+            
+            if ((menuChoice.equals ("1")) || ((menuChoice.equalsIgnoreCase("play")) || (menuChoice.equalsIgnoreCase("interact")))) {
+                System.out.println("Starting...");
+            }
+            else if ((menuChoice.equals ("2")) || (menuChoice.equalsIgnoreCase("instructions"))) {
+                System.out.println("Instructions: ");
+            }
+            else if ((menuChoice.equals ("3")) || (menuChoice.equalsIgnoreCase("exit"))) {
+                try {
+                    PrintWriter write = new PrintWriter(user);
+                    write.println(enteredPass);
+                    write.println(chosenPet);
+                    for (int mStats = 0; mStats < maxStats.length; mStats++) {
+                        write.println(maxStats[mStats]);
+                    }
+                    for (int cStats = 0; cStats < currentStats.length; cStats++) {
+                        write.println(currentStats[cStats]);
+                    }
+                    write.println(moonstones);
+                    write.close();
+                }
+                catch (IOException e) {
+                    System.out.println("Error Occured");
+                }
+                System.exit(0);
+            }
+  
             //number guessing game
-            int moonstones = 0;
             moonstones += numberGuessingGame();
             System.out.println("You earned " + moonstones + " Moonstones!");
-            scan.nextLine();
             
             //matching game
             int moonstonesEarned = matchingGame();
@@ -280,7 +316,5 @@ public class VirtualPet {
             System.out.println("Your Moonstones: " + moonstones);
             
         }
-        System.out.println("wrong username or password");
-        System.exit(0); 
     }
 }
