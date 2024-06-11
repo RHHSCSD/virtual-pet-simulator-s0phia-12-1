@@ -48,7 +48,7 @@ public class VirtualPet {
             firstLetter = vowels.charAt(rd.nextInt(5));
         }
         else {
-            firstLetter = consonants.charAt(rd.nextInt(26));
+            firstLetter = consonants.charAt(rd.nextInt(21));
         }
         petName += firstLetter;
                 
@@ -70,7 +70,7 @@ public class VirtualPet {
     //method to play with pet
     public static void playWithPet(int currentEnergy, int maxEnergy) {
         System.out.print("Playing with pet...");
-        if (currentEnergy < maxEnergy)
+        if (currentEnergy < maxEnergy) 
             currentEnergy += 2;
     }
     //method to feed pet
@@ -163,6 +163,8 @@ public class VirtualPet {
             int moonstonesEarned = 0;
             Scanner scan = new Scanner(System.in);
             
+            System.out.println("\nMatching Game");
+            System.out.println("---------------------");
             for (int i = 0; i < 15; i++) {
                 System.out.print("\nMatch 2 indexes: ");
                 int index1 = scan.nextInt();
@@ -202,12 +204,19 @@ public class VirtualPet {
         
         //money
         int moonstones = 0;
+        int moonstonesEarned = 0;
+        
+        //costs
+        final int ENERGY_COST = 10;
+        final int FOOD_COST = 10;
+        final int HEALTH_COST = 10;
         
         System.out.print("Enter username: ");
         String enteredUser = scan.nextLine();
         String enteredPass = ""; 
         
         String chosenPet = "";
+        String petName = "";
         //pet stats
         int [] maxStats = new int[3];
         int [] currentStats = new int[3];
@@ -229,8 +238,6 @@ public class VirtualPet {
             System.out.println("b) Generate a random name");
             char namingChoice = scan.next().charAt(0);
             
-            String petName = "";
-            
             if (namingChoice == 'a') {
                 scan.nextLine();
                 System.out.print("What's your pet name? ");
@@ -243,13 +250,13 @@ public class VirtualPet {
             
             //health
             maxStats[0] = rd.nextInt((17)+1);
-            currentStats[0] = maxStats[0];
+            currentStats[0] = maxStats[0] / 2;
             //food
             maxStats[1] = rd.nextInt((19 - (maxStats[0])) + 1);
-            currentStats[1] = maxStats[1];
+            currentStats[1] = maxStats[1] / 2;
             //energy
             maxStats[2] = 20 - maxStats[1] - maxStats[2];
-            currentStats[2] = maxStats[2];
+            currentStats[2] = maxStats[2] / 2;
             
             System.out.println("\nMAXHEALTH: " + maxStats[0] + " MAXFOOD: " + maxStats[1] + " MAX_ENERGY: " + maxStats[2]);
             passedLogin = true;  
@@ -258,21 +265,32 @@ public class VirtualPet {
         } else {
             try {
                 Scanner input = new Scanner(user);
+                String filePassword = input.nextLine();
+                chosenPet = input.nextLine();
+                petName = input.nextLine();
+                for (int mStats = 0; mStats < maxStats.length; mStats++) {
+                    maxStats[mStats] = input.nextInt();
+                }
+                for (int cStats = 0; cStats < currentStats.length; cStats++) {
+                    currentStats[cStats] = input.nextInt();
+                }
+                moonstones = input.nextInt();
+                input.close();
+                
                 while ((passedLogin == false) && (count < 3)) {
                     System.out.print("Enter password: ");
                     enteredPass = scan.nextLine();
-                    if (enteredPass == input.nextLine()) 
+                    if (enteredPass.equals(filePassword)) 
                         passedLogin = true;
                     count++;
                 }
-                input.close();
+                
             }
             catch (IOException e) {
                 System.out.println("Login failed.");
                 System.exit(0);         
             }
-          }
-            
+          }     
         //login system
         while (passedLogin == true) {
             //menu
@@ -281,15 +299,99 @@ public class VirtualPet {
             
             if ((menuChoice.equals ("1")) || ((menuChoice.equalsIgnoreCase("play")) || (menuChoice.equalsIgnoreCase("interact")))) {
                 System.out.println("Starting...");
+                System.out.println("Would you like the play a minigame to earn moonstones or interact with your pet?");
+                
+                System.out.println("1) Play");
+                System.out.println("2) Interact");
+                menuChoice = scan.nextLine();
+                
+                if ((menuChoice.equalsIgnoreCase("1")) || (menuChoice.equalsIgnoreCase("play"))) {
+                    System.out.println("Which game would you like to play?");
+                    System.out.println("1) Number Guessing Game");
+                    System.out.println("2) Matching Game");
+                    int gameChoice = scan.nextInt();
+                
+                    //number guessing game
+                    if (gameChoice == 1) {
+                        moonstonesEarned = numberGuessingGame();
+                        moonstones += moonstonesEarned;
+                        System.out.println("You earned " + moonstonesEarned + " Moonstones!");
+                        System.out.println("Your Moonstones: " + moonstones);
+                    }
+                    //matching game
+                    else if (gameChoice == 2) {
+                        moonstonesEarned = matchingGame();
+                        moonstones += moonstonesEarned;
+                        System.out.println("\nYou earned " + moonstonesEarned + " Moonstones!");
+                        System.out.println("Your Moonstones: " + moonstones);
+                    }
+                    else {
+                        System.out.println("You did not select either game.");
+                        System.exit(0);
+                    }
+                }
+                else if ((menuChoice.equalsIgnoreCase("2")) || (menuChoice.equalsIgnoreCase("interact"))) {
+                    System.out.println("Choose what you want to do: ");
+                    System.out.println("1) Play with pet - $" + ENERGY_COST);
+                    System.out.println("2) Feed pet - $" + FOOD_COST);
+                    System.out.println("3) Groom pet - $" + HEALTH_COST);
+                    
+                    String interaction = scan.nextLine();
+                    
+                    if (interaction.equals("1") || interaction.equalsIgnoreCase("play")) {
+                        if (currentStats[2] < maxStats[2] && moonstones >= ENERGY_COST) {
+                            currentStats[2]++;
+                            moonstones -= ENERGY_COST;
+                            System.out.println("You bought a new toy for your pet!");
+                            System.out.println("You have " + moonstones + " moonstones left.");
+                        }
+                        else if (currentStats[2] == maxStats[2]) {
+                            System.out.println("Your pet's energy is full.");
+                        }
+                        else {
+                            System.out.println("You dont have enough moonstones, go play a minigame!");
+                        }
+                    }
+                    else if(interaction.equals("2") || interaction.equalsIgnoreCase("feed")) {
+                        if (currentStats[1] < maxStats[1] && moonstones >= FOOD_COST) {
+                            currentStats[1]++;
+                            moonstones -= FOOD_COST;
+                            System.out.println("You fed your pet!");
+                            System.out.println("You have " + moonstones + " moonstones left.");
+                        }
+                        else if (currentStats[1] == maxStats[1]) {
+                            System.out.println("Your pet is not hungry.");
+                        }
+                        else {
+                            System.out.println("You dont have enough moonstones, go play a minigame!");
+                        }
+                    }
+                    else if(interaction.equals("3") || interaction.equalsIgnoreCase("health")) {
+                        if (currentStats[0] < maxStats[0] && moonstones >= HEALTH_COST) {
+                            currentStats[0]++;
+                            moonstones -= HEALTH_COST;
+                            System.out.println("You groomed your pet!");
+                            System.out.println("You have " + moonstones + " moonstones left.");
+                        }
+                        else if (currentStats[0] == maxStats[0]) {
+                            System.out.println("Your pet is healthy.");
+                        }
+                        else {
+                            System.out.println("You dont have enough moonstones, go play a minigame!");
+                        }
+                    }
+                }
             }
             else if ((menuChoice.equals ("2")) || (menuChoice.equalsIgnoreCase("instructions"))) {
                 System.out.println("Instructions: ");
+                System.out.println("Here in Critterland, have fun playing with your pets and earning the special moonstones! \nRaise your pet and have fun!");
             }
             else if ((menuChoice.equals ("3")) || (menuChoice.equalsIgnoreCase("exit"))) {
                 try {
                     PrintWriter write = new PrintWriter(user);
                     write.println(enteredPass);
                     write.println(chosenPet);
+                    write.println(petName);
                     for (int mStats = 0; mStats < maxStats.length; mStats++) {
                         write.println(maxStats[mStats]);
                     }
@@ -305,16 +407,6 @@ public class VirtualPet {
                 System.exit(0);
             }
   
-            //number guessing game
-            moonstones += numberGuessingGame();
-            System.out.println("You earned " + moonstones + " Moonstones!");
-            
-            //matching game
-            int moonstonesEarned = matchingGame();
-            moonstones += moonstonesEarned;
-            System.out.println("\nYou earned " + moonstonesEarned + " Moonstones!");
-            System.out.println("Your Moonstones: " + moonstones);
-            
         }
     }
 }
